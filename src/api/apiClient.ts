@@ -2,7 +2,8 @@ import axios from 'axios';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAuthStore } from '../store/useAuthStore';
 
-export const API_BASE_URL = 'http://10.0.2.2:8080/api/v1';
+// Pointing to Live Render Production URL
+export const API_BASE_URL = 'https://hms-backend-pd4o.onrender.com/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
