@@ -1,0 +1,678 @@
+/*!*****************************************************************************!*\
+  !*** css ./node_modules/@expo/log-box/src/overlay/AnsiHighlight.module.css ***!
+  \*****************************************************************************/
+.mobile-node_modules_\@expo_log-box_src_overlay_AnsiHighlight_module_css-line {
+  display: flex;
+  flex-direction: row;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_AnsiHighlight_module_css-text {
+  white-space: pre;
+}
+
+/*!*************************************************************************!*\
+  !*** css ./node_modules/@expo/log-box/src/overlay/CodeFrame.module.css ***!
+  \*************************************************************************/
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-fileIcon {
+  display: none;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-copyButton {
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 500;
+  align-items: center;
+  white-space: nowrap;
+  transition: all 0.2s ease-in-out;
+  font-size: 10px;
+
+  background-color: transparent;
+
+  box-shadow: none;
+  gap: 6px;
+  height: 40px;
+  border-radius: 0;
+  border-width: 0;
+  padding-left: 16px;
+  padding-right: 16px;
+
+  justify-content: flex-end;
+  border-left: 1px solid var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-border);
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-background);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-copyButton:hover {
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-secondary-system-background-hover);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-copyButtonIcon {
+  transform: translateZ(0);
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-bottom: -1px;
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-secondary-label);
+  transition: all 0.2s ease-in-out;
+}
+
+/* Child svg of copyButton should transition to diagonally on hover of the button */
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-copyButton:hover .mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-copyButtonIcon {
+  /* origin in bottom left */
+  transform-origin: bottom left;
+  transform: scale(1.1);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-copyButtonText {
+  display: none;
+  align-items: center;
+  color: inherit;
+  line-height: 1;
+  font-size: 14px;
+  font-weight: 400;
+
+  letter-spacing: -0.003rem;
+  font-family: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-font-family);
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-label);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-headerScrollText {
+  color: inherit;
+  font-size: 15px;
+  line-height: 1.25;
+  letter-spacing: -0.009rem;
+  display: flex;
+  overflow-x: auto;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  font-weight: 600;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-header {
+  display: flex;
+  min-height: 40px;
+  justify-content: space-between;
+  overflow: hidden;
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-background);
+  border-bottom: 1px solid var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-border);
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+
+  position: relative;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-headerIconWrapper {
+  display: none;
+}
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-headerText {
+  padding-left: 12px;
+  overflow-wrap: break-word;
+  font-family: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-font-mono);
+  white-space: nowrap;
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-label);
+  padding-right: 16px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-blurGradientRL {
+  background: linear-gradient(to left, var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-background) 0%, rgba(0, 0, 0, 0) 100%);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20;
+  pointer-events: none;
+}
+.mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-blurGradientLR {
+  background: linear-gradient(to right, var(--mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-expo-log-color-background) 0%, rgba(0, 0, 0, 0) 100%);
+  border-top-left-radius: 6px;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 20;
+  pointer-events: none;
+}
+
+@media screen and (min-width: 768px) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-fileIcon {
+    display: block;
+  }
+  .mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-headerText {
+    padding-left: 0px;
+  }
+
+  .mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-headerIconWrapper {
+    display: block;
+    min-width: 1rem;
+    height: 1rem;
+    padding-left: 16px;
+  }
+  .mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-header {
+    padding-left: 0px;
+  }
+  .mobile-node_modules_\@expo_log-box_src_overlay_CodeFrame_module_css-copyButtonText {
+    display: flex;
+  }
+}
+
+/*!***********************************************************************!*\
+  !*** css ./node_modules/@expo/log-box/src/overlay/Overlay.module.css ***!
+  \***********************************************************************/
+/* Using :host to ensure styles only apply in Shadow DOM */
+/* NOTE: :host is transformed to :root on native via shadowDomCssTransformer.js */
+:host {
+  /* Theme variables */
+  /* Based on UIKit colors in dark mode: https://github.com/EvanBacon/expo-apple-colors/blob/80f541c38c7fadcbd8a1fe85800eea0b3a97079b/colors.css#L1 */
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-border: #313538;
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-label: #edeef0;
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-background: #111113;
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-secondary-label: rgba(234.6, 234.6, 244.8, 0.6);
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-secondary-system-background: rgba(28.05, 28.05, 30.6, 1);
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-secondary-system-grouped-background: color(display-p3 0.095 0.098 0.105);
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-secondary-system-background-hover: color(display-p3 0.156 0.163 0.176);
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-danger: color(display-p3 0.861 0.403 0.387);
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-syntax-red: color(display-p3 0.861 0.403 0.387);
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-syntax-orange: color(display-p3 1 0.63 0.38);
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-font-mono: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
+    monospace;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-overlayIos {
+  top: 0;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-overlayAndroid {
+  top: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-android-safe-area-inset-top, env(safe-area-inset-top));
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-overlayWeb {
+  /* Add top safe area for web */
+  top: calc(10vh + env(safe-area-inset-top, 2vh));
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-overlay {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 9900;
+  display: flex;
+  align-content: center;
+  align-items: center;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-containerTopRadius {
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-container {
+  --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-max-width: 960px;
+
+  margin: 0 auto;
+  max-width: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-max-width);
+  width: 100%;
+
+  overflow-x: hidden;
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-background);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-fadeInUp 200ms ease-out forwards;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-fadeInUp 200ms ease-out forwards;
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-background);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-scroll {
+  /* Padding added to give the progressive blur some room to animate in. */
+  padding-top: 16px;
+
+
+  gap: 0.5rem;
+  
+  overflow-y: auto;
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-background);
+  /* Wrap horizontal contents */
+  overflow-x: hidden;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  position: relative;
+  padding-bottom: calc(var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-footer-height) + 1rem);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-bg {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  pointer-events: all;
+  z-index: -1;
+
+  opacity: 0;
+  animation: mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-data-expo-log-backdrop-fade-in 150ms ease-out forwards;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-bgExit {
+  opacity: 1;
+  animation: mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-fadeOut 150ms ease-in forwards;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-containerExit {
+  opacity: 1;
+  transform: translateY(0);
+  animation: mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-fadeOutUp 150ms ease-in forwards;
+}
+
+@keyframes mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-data-expo-log-backdrop-fade-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-fadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-fadeOutUp {
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+@keyframes mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  min-height: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-footer-height);
+  overflow: hidden;
+  padding-bottom: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-android-safe-area-inset-bottom, env(safe-area-inset-bottom));
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-secondary-system-background);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-headerBlur {
+  background: linear-gradient(to top, transparent, var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-background));
+  mask-image: linear-gradient(to bottom, var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-background) 50%, transparent);
+  backdrop-filter: blur(4px);
+  height: 48px;
+  min-height: 48px;
+  position: absolute;
+  top: 47px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Fade manually */
+  opacity: 0;
+}
+
+
+/* md-visible */
+@media screen and (min-width: 576px) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-overlay {
+    top: 10vh;
+    bottom: 10vh;
+  }
+  .mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-container {
+    border: 1px solid var(--mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-color-border);
+    border-radius: 10px;
+  }
+}
+
+@media (min-width: 576px) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-container {
+    --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-max-width: 540px;
+  }
+}
+@media (min-width: 768px) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-container {
+    --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-max-width: 720px;
+  }
+}
+@media (min-width: 992px) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-container {
+    --mobile-node_modules_\@expo_log-box_src_overlay_Overlay_module_css-expo-log-max-width: 960px;
+  }
+}
+
+/*!**********************************************************************!*\
+  !*** css ./node_modules/@expo/log-box/src/overlay/Header.module.css ***!
+  \**********************************************************************/
+/* ErrorOverlayHeader.module.css */
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0 1rem;
+  height: 48px;
+  min-height: 48px;
+  justify-content: space-between;
+  position: relative;
+  /* no text select */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-leftGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 16px;
+  position: relative;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-headerControls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-divider {
+  width: 0;
+  border-left: 1px solid var(--mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-expo-log-color-border);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-navGroup {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-sdkBadge {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 12px;
+  border: 1px solid var(--mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-expo-log-color-border);
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-expo-log-secondary-label);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-sdkIcon {
+  width: 14px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-sdkText {
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-expo-log-secondary-label);
+  font-family: var(--mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-expo-log-font-family);
+  font-size: 0.75rem;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-pageButton {
+  border: none;
+  outline: none;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  width: 24px;
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-expo-log-secondary-system-background);
+  padding: 2px;
+  transition: background-color 0.2s;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-pageButton[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-pageButton:not([aria-disabled]):hover {
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_Header_module_css-expo-log-secondary-system-background-hover);
+}
+/*!**********************************************************************************************!*\
+  !*** css ./node_modules/@expo/log-box/src/overlay/LogBoxInspectorSourceMapStatus.module.css ***!
+  \**********************************************************************************************/
+@keyframes mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-spinner {
+  animation: mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-spin 2s linear infinite;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-root {
+  display: flex;
+  align-items: center;
+  border-radius: 12px;
+  flex-direction: row;
+  height: 24px;
+  padding: 0 8px;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+}
+
+@media (hover: hover) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-root:hover {
+    background-color: rgba(51, 51, 51, 1);
+  }
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-root:active {
+  background-color: rgba(51, 51, 51, 0.6);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-image {
+  height: 14px;
+  width: 16px;
+  margin-right: 4px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_LogBoxInspectorSourceMapStatus_module_css-text {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/*!******************************************************************************!*\
+  !*** css ./node_modules/@expo/log-box/src/overlay/StackTraceList.module.css ***!
+  \******************************************************************************/
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-root {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  justify-content: space-between;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-headerLeft {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-headerIcon {
+  width: 1rem;
+  height: 1rem;
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-label);
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-headerTitle {
+  font-family: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-font-family);
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-label);
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-badge {
+  background-color: rgba(234.6, 234.6, 244.8, 0.1);
+  font-family: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-font-family);
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-label);
+  border-radius: 50px;
+  font-size: 12px;
+  aspect-ratio: 1/1;
+  display: flex;
+  width: 22px;
+  height: 22px;
+  justify-content: center;
+  align-items: center;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-collapseButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-collapseContent {
+  padding: 6px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+  outline-color: transparent;
+  color: rgba(234.6, 234.6, 244.8, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  user-select: none;
+}
+
+@media (hover: hover) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-collapseButton:hover .mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-collapseContent {
+    background-color: rgba(234.6, 234.6, 244.8, 0.1);
+  }
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-collapseTitle {
+  display: none;
+  font-family: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-font-family);
+  font-size: 14px;
+  user-select: none;
+  color: rgba(234.6, 234.6, 244.8, 0.6);
+}
+
+/* xs */
+@media screen and (min-width: 320px) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-collapseTitle {
+    display: block;
+  }
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-transition {
+  overflow: hidden;
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-warningBox {
+  background-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-secondary-system-background);
+  border: 1px solid var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-border);
+  padding: 10px 15px;
+  border-radius: 5px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-warningText {
+  font-family: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-font-family);
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-label);
+  opacity: 0.7;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-stackFrame {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: background-color 0.3s;
+  outline-color: transparent;
+  background-color: transparent;
+  color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-label);
+  cursor: pointer;
+
+  /* collapsed frames */
+  &[data-collapsed] {
+    opacity: 0.4;
+  }
+
+  /* aria-disabled */
+  &[aria-disabled='true'] {
+    background-color: transparent;
+    color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-label);
+    cursor: unset;
+  }
+}
+
+@media (hover: hover) {
+  .mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-stackFrame:hover {
+    background-color: rgba(234.6, 234.6, 244.8, 0.1);
+    outline-color: var(--mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-expo-log-color-label);
+  }
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-stackFrameTitle {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+}
+
+.mobile-node_modules_\@expo_log-box_src_overlay_StackTraceList_module_css-stackFrameFile {
+  font-size: 12px;
+  font-weight: 300;
+  opacity: 0.7;
+  overflow-wrap: break-word;
+}
+
+
+/*# sourceMappingURL=bundle.web.css.map*/

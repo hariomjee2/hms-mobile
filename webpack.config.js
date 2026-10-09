@@ -5,7 +5,14 @@ const appDirectory = path.resolve(__dirname);
 const { presets } = require(`${appDirectory}/babel.config.js`);
 
 const compileNodeModules = [
-  // Add every react-native package that needs compiling
+  'react-native-web',
+  'react-native-screens',
+  'react-native-safe-area-context',
+  'react-native-encrypted-storage',
+  '@react-navigation/native',
+  '@react-navigation/native-stack',
+  '@expo/metro-runtime',
+  '@expo/log-box',
 ].map(moduleName => path.resolve(appDirectory, `node_modules/${moduleName}`));
 
 const babelLoaderConfiguration = {
@@ -50,10 +57,19 @@ module.exports = {
     alias: {
       'react-native$': 'react-native-web',
     },
-    extensions: ['.web.js', '.js', '.web.tsx', '.tsx', '.web.ts', '.ts'],
+    extensions: ['.web.js', '.js', '.web.tsx', '.tsx', '.web.ts', '.ts', '.mjs'],
   },
   module: {
-    rules: [babelLoaderConfiguration, imageLoaderConfiguration],
+    rules: [
+      {
+        test: /\.m?js$/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      babelLoaderConfiguration,
+      imageLoaderConfiguration,
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
