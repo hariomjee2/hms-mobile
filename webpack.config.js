@@ -52,6 +52,7 @@ module.exports = {
   resolve: {
     alias: {
       'react-native$': 'react-native-web',
+      'react-native-encrypted-storage$': path.resolve(appDirectory, 'src/utils/EncryptedStorage.web.ts'),
     },
     extensions: ['.web.js', '.js', '.web.tsx', '.tsx', '.web.ts', '.ts', '.mjs', '.cjs', '.json'],
   },
