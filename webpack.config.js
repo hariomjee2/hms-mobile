@@ -11,6 +11,7 @@ const compileNodeModules = [
   'react-native-encrypted-storage',
   '@react-navigation/native',
   '@react-navigation/native-stack',
+  '@react-navigation/elements',
 ].map(moduleName => path.resolve(appDirectory, `node_modules/${moduleName}`));
 
 const babelLoaderConfiguration = {
@@ -21,6 +22,9 @@ const babelLoaderConfiguration = {
     path.resolve(appDirectory, 'src'),
     ...compileNodeModules,
   ],
+  resolve: {
+    fullySpecified: false,
+  },
   use: {
     loader: 'babel-loader',
     options: {
