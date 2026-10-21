@@ -11,8 +11,6 @@ const compileNodeModules = [
   'react-native-encrypted-storage',
   '@react-navigation/native',
   '@react-navigation/native-stack',
-  '@expo/metro-runtime',
-  '@expo/log-box',
 ].map(moduleName => path.resolve(appDirectory, `node_modules/${moduleName}`));
 
 const babelLoaderConfiguration = {
@@ -37,14 +35,8 @@ const babelLoaderConfiguration = {
 };
 
 const imageLoaderConfiguration = {
-  test: /\.(gif|jpe?g|png|svg)$/,
-  use: {
-    loader: 'url-loader',
-    options: {
-      name: '[name].[ext]',
-      esModule: false,
-    },
-  },
+  test: /\.(gif|jpe?g|png|svg)$/i,
+  type: 'asset/resource',
 };
 
 module.exports = {
@@ -57,12 +49,13 @@ module.exports = {
     alias: {
       'react-native$': 'react-native-web',
     },
-    extensions: ['.web.js', '.js', '.web.tsx', '.tsx', '.web.ts', '.ts', '.mjs'],
+    extensions: ['.web.js', '.js', '.web.tsx', '.tsx', '.web.ts', '.ts', '.mjs', '.cjs', '.json'],
   },
   module: {
     rules: [
       {
         test: /\.m?js$/,
+        type: 'javascript/auto',
         resolve: {
           fullySpecified: false,
         },
