@@ -1,10 +1,18 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import { useAuthStore } from '../store/useAuthStore';
 import { API_BASE_URL } from '@env';
 
+// Automatically adjust base URL for Web browsers vs Android Emulators vs Production
+let resolvedBaseUrl = API_BASE_URL || 'http://localhost:8080/api/v1';
+
+if (Platform.OS === 'web' && resolvedBaseUrl.includes('10.0.2.2')) {
+  resolvedBaseUrl = resolvedBaseUrl.replace('10.0.2.2', 'localhost');
+}
+
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: resolvedBaseUrl,
   headers: {
     'Content-Type': 'application/json',
   },
