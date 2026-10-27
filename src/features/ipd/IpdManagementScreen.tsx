@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useAuthStore } from '../../store/useAuthStore';
 import apiClient from '../../api/apiClient';
+import ToastBanner from '../../components/ToastBanner';
 
 interface Ward {
   id: string;
@@ -72,6 +73,11 @@ const IpdManagementScreen = ({ navigation }: any) => {
   const [selectedWardId, setSelectedWardId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Toast Notification State
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
   // Admission Modal State
   const [admitModalVisible, setAdmitModalVisible] = useState(false);
   const [selectedBed, setSelectedBed] = useState<Bed | null>(null);
@@ -89,6 +95,12 @@ const IpdManagementScreen = ({ navigation }: any) => {
   useEffect(() => {
     loadIpdData();
   }, []);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
 
   const loadIpdData = async () => {
     setLoading(true);
@@ -112,6 +124,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
       }
     } catch (error) {
       console.error('Failed to load IPD data:', error);
+      showToast('Could not load ward matrix data.', 'error');
     } finally {
       setLoading(false);
     }
@@ -120,7 +133,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
   const handleOpenAdmitModal = (bed: Bed) => {
     if (isPatient) return;
     if (bed.status !== 'AVAILABLE') {
-      Alert.alert('Bed Occupied', `Bed ${bed.bedNumber} is currently occupied.`);
+      showToast(`Bed ${bed.bedNumber} is currently occupied.`, 'error');
       return;
     }
     setSelectedBed(bed);
@@ -129,7 +142,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
 
   const handleConfirmAdmission = async () => {
     if (!selectedBed || !patientIdInput || !doctorIdInput) {
-      Alert.alert('Missing Details', 'Please select or enter Patient ID and Doctor ID.');
+      showToast('Please select or enter Patient ID and Doctor ID.', 'error');
       return;
     }
 
@@ -142,12 +155,12 @@ const IpdManagementScreen = ({ navigation }: any) => {
         admissionNotes: admissionNotes.trim(),
       });
 
-      Alert.alert('🎉 Patient Admitted', `Successfully allocated Bed ${selectedBed.bedNumber}.`);
+      showToast(`Successfully allotted Bed ${selectedBed.bedNumber}!`, 'success');
       setAdmitModalVisible(false);
       loadIpdData();
     } catch (error: any) {
       console.error('Admission error:', error);
-      Alert.alert('Admission Error', error?.response?.data?.message || 'Could not admit patient.');
+      showToast(error?.response?.data?.message || 'Could not admit patient.', 'error');
     } finally {
       setSubmittingAdmit(false);
     }
@@ -170,29 +183,20 @@ const IpdManagementScreen = ({ navigation }: any) => {
       const dischargedData = res.data;
       setDischargeModalVisible(false);
       loadIpdData();
+      showToast(`Patient Discharged! Total Bill: $${dischargedData.totalBillAmount?.toFixed(2)}`, 'success');
 
-      Alert.alert(
-        '🏥 Patient Discharged',
-        `Discharge Summary Recorded.\nTotal Bill: $${dischargedData.totalBillAmount?.toFixed(2) || '0.00'}`,
-        [
-          {
-            text: 'Pay Invoice Now',
-            onPress: () => {
-              if (dischargedData.invoiceId) {
-                navigation.navigate('PaymentCheckout', {
-                  invoiceId: dischargedData.invoiceId,
-                  amount: dischargedData.totalBillAmount,
-                  doctorName: dischargedData.doctorName,
-                });
-              }
-            },
-          },
-          { text: 'Close' },
-        ]
-      );
+      if (dischargedData.invoiceId) {
+        setTimeout(() => {
+          navigation.navigate('PaymentCheckout', {
+            invoiceId: dischargedData.invoiceId,
+            amount: dischargedData.totalBillAmount,
+            doctorName: dischargedData.doctorName,
+          });
+        }, 1500);
+      }
     } catch (error: any) {
       console.error('Discharge error:', error);
-      Alert.alert('Discharge Error', error?.response?.data?.message || 'Could not discharge patient.');
+      showToast(error?.response?.data?.message || 'Could not discharge patient.', 'error');
     } finally {
       setSubmittingDischarge(false);
     }
@@ -206,6 +210,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
   if (isPatient) {
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ToastBanner visible={toastVisible} message={toastMessage} type={toastType} onClose={() => setToastVisible(false)} />
         <Text style={styles.headerTitle}>My In-Patient Stay (IPD)</Text>
         <Text style={styles.subTitle}>View your current active room admission and hospital ward details</Text>
 
@@ -264,6 +269,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
   // DOCTOR / STAFF / ADMIN ROLE VIEW
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ToastBanner visible={toastVisible} message={toastMessage} type={toastType} onClose={() => setToastVisible(false)} />
       <Text style={styles.headerTitle}>In-Patient Department (IPD)</Text>
       <Text style={styles.subTitle}>Real-time ward occupancy, bed matrix, and admission management</Text>
 
@@ -272,7 +278,8 @@ const IpdManagementScreen = ({ navigation }: any) => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.wardScroll}>
         <TouchableOpacity
           style={[styles.wardTab, selectedWardId === null && styles.wardTabActive]}
-          onPress={() => setSelectedWardId(null)}>
+          onPress={() => setSelectedWardId(null)}
+          activeOpacity={0.7}>
           <Text style={[styles.wardTabText, selectedWardId === null && styles.wardTabTextActive]}>
             All Wards ({beds.length})
           </Text>
@@ -281,6 +288,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
         {wards.map(w => (
           <TouchableOpacity
             key={w.id}
+            activeOpacity={0.7}
             style={[styles.wardCard, selectedWardId === w.id && styles.wardCardActive]}
             onPress={() => setSelectedWardId(selectedWardId === w.id ? null : w.id)}>
             <Text style={styles.wardCardTitle}>{w.wardName}</Text>
@@ -308,6 +316,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
             return (
               <TouchableOpacity
                 key={b.id}
+                activeOpacity={0.7}
                 style={[styles.bedChip, isAvail ? styles.bedAvail : styles.bedOcc]}
                 onPress={() => handleOpenAdmitModal(b)}>
                 <Text style={styles.bedIcon}>{isAvail ? '🛏️' : '🏥'}</Text>
@@ -346,6 +355,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
 
             <TouchableOpacity
               style={styles.dischargeBtn}
+              activeOpacity={0.7}
               onPress={() => handleOpenDischargeModal(a)}>
               <Text style={styles.dischargeBtnText}>📋 Discharge & Generate Bill</Text>
             </TouchableOpacity>

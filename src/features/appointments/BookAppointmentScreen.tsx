@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import apiClient from '../../api/apiClient';
+import ToastBanner from '../../components/ToastBanner';
 
 interface Doctor {
   id: string;
@@ -34,9 +35,20 @@ const BookAppointmentScreen = ({ navigation }: any) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  // Toast Notification State
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
+
   useEffect(() => {
     fetchDoctors();
   }, []);
+
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
 
   const fetchDoctors = async () => {
     try {
@@ -47,7 +59,7 @@ const BookAppointmentScreen = ({ navigation }: any) => {
       }
     } catch (error) {
       console.error('Failed to load doctors:', error);
-      Alert.alert('Error', 'Unable to fetch doctors list.');
+      showToast('Unable to fetch doctors list.', 'error');
     } finally {
       setLoading(false);
     }
@@ -55,7 +67,7 @@ const BookAppointmentScreen = ({ navigation }: any) => {
 
   const handleBook = async () => {
     if (!selectedDoctor) {
-      Alert.alert('Selection Required', 'Please select a doctor.');
+      showToast('Please select a doctor.', 'error');
       return;
     }
 
@@ -67,15 +79,13 @@ const BookAppointmentScreen = ({ navigation }: any) => {
         notes: notes.trim(),
       });
 
-      Alert.alert('🎉 Appointment Booked!', `Your appointment with Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName} is confirmed.`, [
-        {
-          text: 'View My Appointments',
-          onPress: () => navigation.navigate('MyAppointments'),
-        },
-      ]);
+      showToast(`Appointment with Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName} confirmed!`, 'success');
+      setTimeout(() => {
+        navigation.navigate('MyAppointments');
+      }, 1500);
     } catch (error: any) {
       console.error('Booking failed:', error);
-      Alert.alert('Booking Failed', error?.response?.data?.message || 'Could not process booking.');
+      showToast(error?.response?.data?.message || 'Could not process booking.', 'error');
     } finally {
       setSubmitting(false);
     }
@@ -99,6 +109,13 @@ const BookAppointmentScreen = ({ navigation }: any) => {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ToastBanner
+        visible={toastVisible}
+        message={toastMessage}
+        type={toastType}
+        onClose={() => setToastVisible(false)}
+      />
+
       <Text style={styles.headerTitle}>Book an Appointment</Text>
       <Text style={styles.subTitle}>Select a specialist doctor and preferred consultation slot</Text>
 
