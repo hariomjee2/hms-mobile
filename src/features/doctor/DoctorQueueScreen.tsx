@@ -8,8 +8,11 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Modal,
+  TextInput,
 } from 'react-native';
 import apiClient from '../../api/apiClient';
+import ToastBanner from '../../components/ToastBanner';
 
 interface QueueItem {
   id: string;
@@ -19,11 +22,28 @@ interface QueueItem {
   notes: string;
 }
 
+const WARD_OPTIONS = [
+  { label: 'Intensive Care Unit (ICU)', value: 'ICU' },
+  { label: 'General Medical Ward', value: 'GENERAL' },
+  { label: 'Private Deluxe Suite', value: 'PRIVATE' },
+];
+
 const DoctorQueueScreen = ({ navigation }: any) => {
   const [queue, setQueue] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [calling, setCalling] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // IPD Referral Modal State
+  const [ipdModalVisible, setIpdModalVisible] = useState(false);
+  const [selectedWardType, setSelectedWardType] = useState('GENERAL');
+  const [referralNotes, setReferralNotes] = useState('Patient requires in-patient observation.');
+  const [submittingReferral, setSubmittingReferral] = useState(false);
+
+  // Toast State
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState<'success' | 'error'>('success');
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -33,10 +53,16 @@ const DoctorQueueScreen = ({ navigation }: any) => {
     return unsubscribe;
   }, [navigation]);
 
+  const showToast = (message: string, type: 'success' | 'error' = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+  };
+
   const fetchQueue = async () => {
     try {
       const response = await apiClient.get('/queue/doctor-live');
-      setQueue(response.data);
+      setQueue(response.data || []);
     } catch (error) {
       console.error('Failed to load doctor queue:', error);
     } finally {
@@ -50,16 +76,35 @@ const DoctorQueueScreen = ({ navigation }: any) => {
     try {
       const response = await apiClient.post('/queue/call-next');
       if (response.status === 204 || !response.data) {
-        Alert.alert('Queue Complete', 'There are no waiting patients left in queue.');
+        showToast('There are no waiting patients left in queue.', 'info');
       } else {
-        Alert.alert('Calling Patient', `Calling Token #${response.data.tokenNumber} (${response.data.patientName}) into cabin.`);
+        showToast(`Calling Token #${response.data.tokenNumber} (${response.data.patientName}) into cabin!`, 'success');
       }
       fetchQueue();
     } catch (error) {
       console.error('Call next error:', error);
-      Alert.alert('Error', 'Unable to call next patient.');
+      showToast('Unable to call next patient.', 'error');
     } finally {
       setCalling(false);
+    }
+  };
+
+  const handleConfirmIpdReferral = async (appointmentId: string) => {
+    setSubmittingReferral(true);
+    try {
+      await apiClient.post(`/appointments/${appointmentId}/refer-ipd`, {
+        wardType: selectedWardType,
+        notes: referralNotes.trim(),
+      });
+
+      showToast('Hospitalization Referral Submitted to IPD Desk!', 'success');
+      setIpdModalVisible(false);
+      fetchQueue();
+    } catch (error: any) {
+      console.error('Referral failed:', error);
+      showToast(error?.response?.data?.message || 'Could not submit referral.', 'error');
+    } finally {
+      setSubmittingReferral(false);
     }
   };
 
@@ -81,6 +126,8 @@ const DoctorQueueScreen = ({ navigation }: any) => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchQueue(); }} />
       }>
+      <ToastBanner visible={toastVisible} message={toastMessage} type={toastType} onClose={() => setToastVisible(false)} />
+
       <Text style={styles.headerTitle}>Live Consultation Cabin</Text>
       <Text style={styles.subTitle}>Manage patient queue and consultations in real-time</Text>
 
@@ -88,6 +135,7 @@ const DoctorQueueScreen = ({ navigation }: any) => {
       <TouchableOpacity
         style={[styles.callNextBtn, calling && styles.btnDisabled]}
         onPress={handleCallNext}
+        activeOpacity={0.7}
         disabled={calling}>
         {calling ? (
           <ActivityIndicator color="#FFFFFF" />
@@ -112,13 +160,21 @@ const DoctorQueueScreen = ({ navigation }: any) => {
           ) : null}
 
           <TouchableOpacity
+            style={styles.ipdBtn}
+            onPress={() => setIpdModalVisible(true)}
+            activeOpacity={0.7}>
+            <Text style={styles.btnTextText}>🚨 Refer for IPD Hospitalization</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={styles.labBtn}
             onPress={() =>
               navigation.navigate('AssignLabTest', {
                 appointmentId: currentPatient.id,
                 patientName: currentPatient.patientName,
               })
-            }>
+            }
+            activeOpacity={0.7}>
             <Text style={styles.btnTextText}>🔬 Assign Diagnostic Lab Tests</Text>
           </TouchableOpacity>
 
@@ -129,7 +185,8 @@ const DoctorQueueScreen = ({ navigation }: any) => {
                 appointmentId: currentPatient.id,
                 patientName: currentPatient.patientName,
               })
-            }>
+            }
+            activeOpacity={0.7}>
             <Text style={styles.btnTextText}>💊 Issue Digital Prescription & Bill</Text>
           </TouchableOpacity>
         </View>
@@ -156,6 +213,54 @@ const DoctorQueueScreen = ({ navigation }: any) => {
       ) : (
         <Text style={styles.noWaitingText}>No patients waiting right now.</Text>
       )}
+
+      {/* IPD Referral Modal */}
+      {currentPatient ? (
+        <Modal visible={ipdModalVisible} transparent animationType="slide">
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Refer {currentPatient.patientName} for IPD</Text>
+              <Text style={styles.modalSub}>Send admission referral to IPD Desk & Ward Management</Text>
+
+              <Text style={styles.inputLabel}>Recommended Ward Type</Text>
+              <View style={styles.wardTypeRow}>
+                {WARD_OPTIONS.map((w) => (
+                  <TouchableOpacity
+                    key={w.value}
+                    style={[styles.wardChip, selectedWardType === w.value && styles.wardChipActive]}
+                    onPress={() => setSelectedWardType(w.value)}>
+                    <Text style={[styles.wardChipText, selectedWardType === w.value && styles.wardChipTextActive]}>
+                      {w.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <Text style={styles.inputLabel}>Clinical Referral Notes</Text>
+              <TextInput
+                style={[styles.textInput, { height: 80 }]}
+                multiline
+                value={referralNotes}
+                onChangeText={setReferralNotes}
+                placeholder="Reason for hospitalization, clinical observation required..."
+              />
+
+              <View style={styles.modalBtnRow}>
+                <TouchableOpacity style={styles.cancelBtn} onPress={() => setIpdModalVisible(false)}>
+                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.confirmBtn, submittingReferral && styles.btnDisabled]}
+                  onPress={() => handleConfirmIpdReferral(currentPatient.id)}
+                  disabled={submittingReferral}>
+                  {submittingReferral ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.confirmBtnText}>Submit Referral</Text>}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+      ) : null}
     </ScrollView>
   );
 };
@@ -167,6 +272,9 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    maxWidth: 750,
+    alignSelf: 'center',
+    width: '100%',
   },
   center: {
     flex: 1,
@@ -244,12 +352,19 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontStyle: 'italic',
   },
+  ipdBtn: {
+    backgroundColor: '#DC2626',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
   labBtn: {
     backgroundColor: '#0284C7',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 16,
+    marginTop: 10,
   },
   rxBtn: {
     backgroundColor: '#2563EB',
@@ -312,6 +427,99 @@ const styles = StyleSheet.create({
   noWaitingText: {
     color: '#94A3B8',
     fontStyle: 'italic',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(15, 23, 42, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    maxWidth: 500,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  modalSub: {
+    fontSize: 13,
+    color: '#DC2626',
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+    marginBottom: 6,
+  },
+  wardTypeRow: {
+    gap: 8,
+    marginBottom: 12,
+  },
+  wardChip: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  wardChipActive: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#DC2626',
+  },
+  wardChipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  wardChipTextActive: {
+    color: '#DC2626',
+    fontWeight: 'bold',
+  },
+  textInput: {
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: '#0F172A',
+    marginBottom: 12,
+  },
+  modalBtnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+    marginTop: 8,
+  },
+  cancelBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#F1F5F9',
+  },
+  cancelBtnText: {
+    color: '#475569',
+    fontWeight: '600',
+  },
+  confirmBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    backgroundColor: '#DC2626',
+  },
+  confirmBtnText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
 });
 
