@@ -128,15 +128,15 @@ const PatientHomeScreen = ({ navigation }: any) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.gridCard}
-          onPress={() => navigation.navigate('MyAppointments')}>
-          <Text style={styles.gridIcon}>📋</Text>
-          <Text style={styles.gridText}>My Consultations</Text>
+          onPress={() => navigation.navigate('Pharmacy')}>
+          <Text style={styles.gridIcon}>💊</Text>
+          <Text style={styles.gridText}>Pharmacy POS</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.gridCard}
-          onPress={() => navigation.navigate('Prescriptions')}>
-          <Text style={styles.gridIcon}>💊</Text>
-          <Text style={styles.gridText}>Prescriptions</Text>
+          onPress={() => navigation.navigate('MyAppointments')}>
+          <Text style={styles.gridIcon}>📋</Text>
+          <Text style={styles.gridText}>My Consultations</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.gridCard}

@@ -16,6 +16,7 @@ import PatientDocumentsScreen from '../features/patient/PatientDocumentsScreen';
 import AssignLabTestScreen from '../features/lab/AssignLabTestScreen';
 import PatientLabOrdersScreen from '../features/lab/PatientLabOrdersScreen';
 import IpdManagementScreen from '../features/ipd/IpdManagementScreen';
+import PharmacyScreen from '../features/pharmacy/PharmacyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -94,6 +95,11 @@ const MainStack = () => {
         name="IpdManagement"
         component={IpdManagementScreen}
         options={{ title: 'IPD & Bed Management' }}
+      />
+      <Stack.Screen
+        name="Pharmacy"
+        component={PharmacyScreen}
+        options={{ title: 'Pharmacy & Stock POS' }}
       />
       <Stack.Screen
         name="AddDoctor"
