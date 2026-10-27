@@ -122,6 +122,12 @@ const PatientHomeScreen = ({ navigation }: any) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.gridCard}
+          onPress={() => navigation.navigate('IpdManagement')}>
+          <Text style={styles.gridIcon}>🛏️</Text>
+          <Text style={styles.gridText}>IPD Bed Matrix</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.gridCard}
           onPress={() => navigation.navigate('MyAppointments')}>
           <Text style={styles.gridIcon}>📋</Text>
           <Text style={styles.gridText}>My Consultations</Text>
@@ -137,6 +143,12 @@ const PatientHomeScreen = ({ navigation }: any) => {
           onPress={() => navigation.navigate('Billing')}>
           <Text style={styles.gridIcon}>💳</Text>
           <Text style={styles.gridText}>Billing & Claims</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.gridCard}
+          onPress={() => navigation.navigate('PatientLabOrders')}>
+          <Text style={styles.gridIcon}>🧪</Text>
+          <Text style={styles.gridText}>Lab Orders</Text>
         </TouchableOpacity>
       </View>
 
