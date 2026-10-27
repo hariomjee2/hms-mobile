@@ -52,6 +52,14 @@ interface Admission {
   invoiceId?: string;
 }
 
+const PRESET_PATIENTS = [
+  { name: 'John Doe (Demo Patient)', id: '11111111-1111-1111-1111-111111111111' },
+];
+
+const PRESET_DOCTORS = [
+  { name: 'Dr. Jane Smith (Cardiology)', id: '22222222-2222-2222-2222-222222222222' },
+];
+
 const IpdManagementScreen = ({ navigation }: any) => {
   const { user } = useAuthStore();
   const roles = user?.roles || [];
@@ -67,9 +75,9 @@ const IpdManagementScreen = ({ navigation }: any) => {
   // Admission Modal State
   const [admitModalVisible, setAdmitModalVisible] = useState(false);
   const [selectedBed, setSelectedBed] = useState<Bed | null>(null);
-  const [patientIdInput, setPatientIdInput] = useState('11111111-1111-1111-1111-111111111111'); // Demo Patient UUID
-  const [doctorIdInput, setDoctorIdInput] = useState('22222222-2222-2222-2222-222222222222'); // Demo Doctor UUID
-  const [admissionNotes, setAdmissionNotes] = useState('Patient requires ICU cardiac observation.');
+  const [patientIdInput, setPatientIdInput] = useState('11111111-1111-1111-1111-111111111111');
+  const [doctorIdInput, setDoctorIdInput] = useState('22222222-2222-2222-2222-222222222222');
+  const [admissionNotes, setAdmissionNotes] = useState('Patient requires in-house ward surveillance.');
   const [submittingAdmit, setSubmittingAdmit] = useState(false);
 
   // Discharge Modal State
@@ -110,7 +118,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
   };
 
   const handleOpenAdmitModal = (bed: Bed) => {
-    if (isPatient) return; // Patients cannot trigger admission
+    if (isPatient) return;
     if (bed.status !== 'AVAILABLE') {
       Alert.alert('Bed Occupied', `Bed ${bed.bedNumber} is currently occupied.`);
       return;
@@ -121,7 +129,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
 
   const handleConfirmAdmission = async () => {
     if (!selectedBed || !patientIdInput || !doctorIdInput) {
-      Alert.alert('Missing Details', 'Please fill in Patient ID and Doctor ID.');
+      Alert.alert('Missing Details', 'Please select or enter Patient ID and Doctor ID.');
       return;
     }
 
@@ -290,7 +298,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
       </ScrollView>
 
       {/* Bed Matrix Grid */}
-      <Text style={styles.sectionTitle}>Bed Status Matrix</Text>
+      <Text style={styles.sectionTitle}>Bed Status Matrix (Click Available Green Chip to Allot Bed)</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#2563EB" style={{ marginVertical: 20 }} />
       ) : (
@@ -305,7 +313,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
                 <Text style={styles.bedIcon}>{isAvail ? '🛏️' : '🏥'}</Text>
                 <Text style={styles.bedNumber}>{b.bedNumber}</Text>
                 <Text style={[styles.bedStatusText, isAvail ? styles.textAvail : styles.textOcc]}>
-                  {b.status}
+                  {isAvail ? 'Allot Bed' : 'Occupied'}
                 </Text>
               </TouchableOpacity>
             );
@@ -329,11 +337,11 @@ const IpdManagementScreen = ({ navigation }: any) => {
               </View>
             </View>
 
-            <Text style={styles.admDetail}>Doctor: {a.doctorName}</Text>
-            <Text style={styles.admDetail}>Admitted: {new Date(a.admissionDate).toLocaleString()}</Text>
+            <Text style={styles.admDetail}>Attending Doctor: {a.doctorName}</Text>
+            <Text style={styles.admDetail}>Admitted On: {new Date(a.admissionDate).toLocaleString()}</Text>
 
             {a.admissionNotes ? (
-              <Text style={styles.admNotes}>Notes: {a.admissionNotes}</Text>
+              <Text style={styles.admNotes}>Clinical Notes: {a.admissionNotes}</Text>
             ) : null}
 
             <TouchableOpacity
@@ -349,8 +357,22 @@ const IpdManagementScreen = ({ navigation }: any) => {
       <Modal visible={admitModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Admit Patient to Bed {selectedBed?.bedNumber}</Text>
+            <Text style={styles.modalTitle}>Allot Bed {selectedBed?.bedNumber}</Text>
             <Text style={styles.modalSub}>{selectedBed?.wardName} (${selectedBed?.dailyRate?.toFixed(2)}/day)</Text>
+
+            <Text style={styles.inputLabel}>Select Patient</Text>
+            <View style={styles.presetRow}>
+              {PRESET_PATIENTS.map(p => (
+                <TouchableOpacity
+                  key={p.id}
+                  style={[styles.presetChip, patientIdInput === p.id && styles.presetChipActive]}
+                  onPress={() => setPatientIdInput(p.id)}>
+                  <Text style={[styles.presetChipText, patientIdInput === p.id && styles.presetChipTextActive]}>
+                    👤 {p.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
 
             <Text style={styles.inputLabel}>Patient ID (UUID)</Text>
             <TextInput
@@ -359,14 +381,28 @@ const IpdManagementScreen = ({ navigation }: any) => {
               onChangeText={setPatientIdInput}
             />
 
-            <Text style={styles.inputLabel}>Attending Doctor ID (UUID)</Text>
+            <Text style={styles.inputLabel}>Select Attending Doctor</Text>
+            <View style={styles.presetRow}>
+              {PRESET_DOCTORS.map(d => (
+                <TouchableOpacity
+                  key={d.id}
+                  style={[styles.presetChip, doctorIdInput === d.id && styles.presetChipActive]}
+                  onPress={() => setDoctorIdInput(d.id)}>
+                  <Text style={[styles.presetChipText, doctorIdInput === d.id && styles.presetChipTextActive]}>
+                    👨‍⚕️ {d.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+
+            <Text style={styles.inputLabel}>Doctor ID (UUID)</Text>
             <TextInput
               style={styles.textInput}
               value={doctorIdInput}
               onChangeText={setDoctorIdInput}
             />
 
-            <Text style={styles.inputLabel}>Admission Notes / Diagnosis</Text>
+            <Text style={styles.inputLabel}>Clinical Admission Notes</Text>
             <TextInput
               style={[styles.textInput, { height: 70 }]}
               multiline
@@ -388,7 +424,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
                 {submittingAdmit ? (
                   <ActivityIndicator color="#FFFFFF" />
                 ) : (
-                  <Text style={styles.confirmBtnText}>Confirm Admission</Text>
+                  <Text style={styles.confirmBtnText}>Allot Bed & Admit</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -677,6 +713,33 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#475569',
     marginBottom: 4,
+  },
+  presetRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 10,
+  },
+  presetChip: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+  },
+  presetChipActive: {
+    backgroundColor: '#EFF6FF',
+    borderColor: '#2563EB',
+  },
+  presetChipText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  presetChipTextActive: {
+    color: '#2563EB',
+    fontWeight: 'bold',
   },
   textInput: {
     backgroundColor: '#F8FAFC',
