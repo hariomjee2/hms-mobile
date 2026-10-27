@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 
 interface ToastBannerProps {
   visible: boolean;
@@ -62,21 +62,23 @@ const ToastBanner: React.FC<ToastBannerProps> = ({
 
 const styles = StyleSheet.create({
   bannerContainer: {
-    position: 'absolute',
-    top: 10,
+    position: Platform.OS === 'web' ? ('fixed' as any) : 'absolute',
+    top: 15,
     left: 20,
     right: 20,
-    zIndex: 9999,
+    maxWidth: 600,
+    alignSelf: 'center',
+    zIndex: 999999,
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    elevation: 6,
+    elevation: 8,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
   },
   bannerIcon: {
     fontSize: 18,

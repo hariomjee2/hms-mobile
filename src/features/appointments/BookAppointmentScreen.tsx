@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import apiClient from '../../api/apiClient';
 import ToastBanner from '../../components/ToastBanner';
@@ -22,6 +21,7 @@ interface Doctor {
 }
 
 const BookAppointmentScreen = ({ navigation }: any) => {
+  const scrollRef = useRef<ScrollView>(null);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
 
@@ -48,6 +48,7 @@ const BookAppointmentScreen = ({ navigation }: any) => {
     setToastMessage(message);
     setToastType(type);
     setToastVisible(true);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
 
   const fetchDoctors = async () => {
@@ -108,7 +109,7 @@ const BookAppointmentScreen = ({ navigation }: any) => {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView ref={scrollRef} style={styles.container} contentContainerStyle={styles.content}>
       <ToastBanner
         visible={toastVisible}
         message={toastMessage}

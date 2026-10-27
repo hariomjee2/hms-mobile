@@ -25,14 +25,22 @@ apiClient.interceptors.request.use(
       if (!token) {
         token = useAuthStore.getState().token;
       }
-      if (token && config.headers) {
-        config.headers.Authorization = `Bearer ${token}`;
+      if (token) {
+        if (config.headers && typeof config.headers.set === 'function') {
+          config.headers.set('Authorization', `Bearer ${token}`);
+        } else if (config.headers) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
       }
     } catch (error) {
       console.error('Error fetching token from storage, using memory token', error);
       const memToken = useAuthStore.getState().token;
-      if (memToken && config.headers) {
-        config.headers.Authorization = `Bearer ${memToken}`;
+      if (memToken) {
+        if (config.headers && typeof config.headers.set === 'function') {
+          config.headers.set('Authorization', `Bearer ${memToken}`);
+        } else if (config.headers) {
+          config.headers['Authorization'] = `Bearer ${memToken}`;
+        }
       }
     }
     console.log(`🚀 [API REQUEST] ${config.method?.toUpperCase()} ${config.url} (Base: ${config.baseURL})`);
