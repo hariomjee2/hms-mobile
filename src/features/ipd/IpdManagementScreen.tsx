@@ -9,8 +9,8 @@ import {
   Modal,
   TextInput,
   Alert,
-  FlatList,
 } from 'react-native';
+import { useAuthStore } from '../../store/useAuthStore';
 import apiClient from '../../api/apiClient';
 
 interface Ward {
@@ -53,9 +53,14 @@ interface Admission {
 }
 
 const IpdManagementScreen = ({ navigation }: any) => {
+  const { user } = useAuthStore();
+  const roles = user?.roles || [];
+  const isPatient = roles.includes('ROLE_PATIENT') && !roles.includes('ROLE_DOCTOR') && !roles.includes('ROLE_ADMIN');
+
   const [wards, setWards] = useState<Ward[]>([]);
   const [beds, setBeds] = useState<Bed[]>([]);
   const [admissions, setAdmissions] = useState<Admission[]>([]);
+  const [myAdmission, setMyAdmission] = useState<Admission | null>(null);
   const [selectedWardId, setSelectedWardId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -80,14 +85,23 @@ const IpdManagementScreen = ({ navigation }: any) => {
   const loadIpdData = async () => {
     setLoading(true);
     try {
-      const [wardsRes, bedsRes, admissionsRes] = await Promise.all([
-        apiClient.get('/ipd/wards'),
-        apiClient.get('/ipd/beds'),
-        apiClient.get('/ipd/admissions?status=ADMITTED'),
-      ]);
-      setWards(wardsRes.data || []);
-      setBeds(bedsRes.data || []);
-      setAdmissions(admissionsRes.data || []);
+      if (isPatient) {
+        const [wardsRes, myRes] = await Promise.all([
+          apiClient.get('/ipd/wards'),
+          apiClient.get('/ipd/admissions/my'),
+        ]);
+        setWards(wardsRes.data || []);
+        setMyAdmission(myRes.data || null);
+      } else {
+        const [wardsRes, bedsRes, admissionsRes] = await Promise.all([
+          apiClient.get('/ipd/wards'),
+          apiClient.get('/ipd/beds'),
+          apiClient.get('/ipd/admissions?status=ADMITTED'),
+        ]);
+        setWards(wardsRes.data || []);
+        setBeds(bedsRes.data || []);
+        setAdmissions(admissionsRes.data || []);
+      }
     } catch (error) {
       console.error('Failed to load IPD data:', error);
     } finally {
@@ -96,6 +110,7 @@ const IpdManagementScreen = ({ navigation }: any) => {
   };
 
   const handleOpenAdmitModal = (bed: Bed) => {
+    if (isPatient) return; // Patients cannot trigger admission
     if (bed.status !== 'AVAILABLE') {
       Alert.alert('Bed Occupied', `Bed ${bed.bedNumber} is currently occupied.`);
       return;
@@ -179,6 +194,66 @@ const IpdManagementScreen = ({ navigation }: any) => {
     ? beds.filter(b => b.wardId === selectedWardId)
     : beds;
 
+  // PATIENT ROLE VIEW
+  if (isPatient) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.headerTitle}>My In-Patient Stay (IPD)</Text>
+        <Text style={styles.subTitle}>View your current active room admission and hospital ward details</Text>
+
+        {loading ? (
+          <ActivityIndicator size="large" color="#2563EB" style={{ marginVertical: 30 }} />
+        ) : myAdmission ? (
+          <View style={styles.myStayCard}>
+            <View style={styles.myStayHeader}>
+              <Text style={styles.myStayTitle}>🏥 ACTIVE HOSPITAL ADMISSION</Text>
+              <View style={styles.myStayBedTag}>
+                <Text style={styles.myStayBedTagText}>Bed {myAdmission.bedNumber}</Text>
+              </View>
+            </View>
+
+            <Text style={styles.myStayWardName}>{myAdmission.wardName}</Text>
+            <Text style={styles.myStayRate}>Daily Rate: ${myAdmission.dailyRate?.toFixed(2)} / day</Text>
+
+            <View style={styles.myStayDivider} />
+
+            <Text style={styles.myStayDetail}>Attending Doctor: <Text style={styles.boldText}>{myAdmission.doctorName}</Text></Text>
+            <Text style={styles.myStayDetail}>Admitted On: <Text style={styles.boldText}>{new Date(myAdmission.admissionDate).toLocaleString()}</Text></Text>
+
+            {myAdmission.admissionNotes ? (
+              <View style={styles.notesBox}>
+                <Text style={styles.notesLabel}>Clinical Admission Notes:</Text>
+                <Text style={styles.notesText}>{myAdmission.admissionNotes}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : (
+          <View style={styles.noStayCard}>
+            <Text style={styles.noStayIcon}>🛏️</Text>
+            <Text style={styles.noStayTitle}>No Active In-Patient Admission</Text>
+            <Text style={styles.noStaySub}>You are currently not admitted to any hospital ward or bed.</Text>
+          </View>
+        )}
+
+        {/* Hospital Wards Overview for Patients */}
+        <Text style={styles.sectionTitle}>Hospital Wards & Daily Rates</Text>
+        {wards.map(w => (
+          <View key={w.id} style={styles.patientWardCard}>
+            <View style={styles.pWardHeader}>
+              <Text style={styles.pWardName}>{w.wardName}</Text>
+              <Text style={styles.pWardRate}>${w.dailyRate.toFixed(2)} / day</Text>
+            </View>
+            <Text style={styles.pWardType}>Type: {w.wardType}</Text>
+            <Text style={styles.pWardAvailability}>
+              Available Beds: <Text style={{ color: w.availableBedsCount > 0 ? '#16A34A' : '#DC2626', fontWeight: 'bold' }}>{w.availableBedsCount} of {w.totalBeds}</Text>
+            </Text>
+          </View>
+        ))}
+      </ScrollView>
+    );
+  }
+
+  // DOCTOR / STAFF / ADMIN ROLE VIEW
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.headerTitle}>In-Patient Department (IPD)</Text>
@@ -642,6 +717,135 @@ const styles = StyleSheet.create({
   },
   btnDisabled: {
     opacity: 0.6,
+  },
+  // Patient specific styles
+  myStayCard: {
+    backgroundColor: '#1E293B',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    elevation: 3,
+  },
+  myStayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  myStayTitle: {
+    color: '#38BDF8',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  myStayBedTag: {
+    backgroundColor: '#0284C7',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  myStayBedTagText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  myStayWardName: {
+    color: '#FFFFFF',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  myStayRate: {
+    color: '#94A3B8',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  myStayDivider: {
+    height: 1,
+    backgroundColor: '#334155',
+    marginVertical: 12,
+  },
+  myStayDetail: {
+    color: '#CBD5E1',
+    fontSize: 13,
+    marginTop: 4,
+  },
+  boldText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  notesBox: {
+    backgroundColor: '#0F172A',
+    borderRadius: 8,
+    padding: 10,
+    marginTop: 10,
+  },
+  notesLabel: {
+    color: '#94A3B8',
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  notesText: {
+    color: '#E2E8F0',
+    fontSize: 13,
+    marginTop: 2,
+    fontStyle: 'italic',
+  },
+  noStayCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  noStayIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  noStayTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  noStaySub: {
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  patientWardCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  pWardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  pWardName: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#0F172A',
+  },
+  pWardRate: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#2563EB',
+  },
+  pWardType: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  pWardAvailability: {
+    fontSize: 12,
+    color: '#475569',
+    marginTop: 6,
   },
 });
 
