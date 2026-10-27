@@ -23,8 +23,14 @@ interface Doctor {
 const BookAppointmentScreen = ({ navigation }: any) => {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
-  const [selectedDate, setSelectedDate] = useState('2026-10-01T10:00:00Z');
-  const [notes, setNotes] = useState('');
+
+  // Default to tomorrow at 10:00 AM
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(10, 0, 0, 0);
+
+  const [selectedDate, setSelectedDate] = useState(tomorrow.toISOString());
+  const [notes, setNotes] = useState('Routine health checkup & consultation.');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -35,8 +41,8 @@ const BookAppointmentScreen = ({ navigation }: any) => {
   const fetchDoctors = async () => {
     try {
       const response = await apiClient.get('/doctors');
-      setDoctors(response.data);
-      if (response.data.length > 0) {
+      setDoctors(response.data || []);
+      if (response.data && response.data.length > 0) {
         setSelectedDoctor(response.data[0]);
       }
     } catch (error) {
@@ -61,25 +67,32 @@ const BookAppointmentScreen = ({ navigation }: any) => {
         notes: notes.trim(),
       });
 
-      Alert.alert('Success', 'Your appointment request has been submitted!', [
+      Alert.alert('🎉 Appointment Booked!', `Your appointment with Dr. ${selectedDoctor.firstName} ${selectedDoctor.lastName} is confirmed.`, [
         {
-          text: 'View Appointments',
+          text: 'View My Appointments',
           onPress: () => navigation.navigate('MyAppointments'),
         },
       ]);
     } catch (error: any) {
       console.error('Booking failed:', error);
-      Alert.alert('Booking Failed', error?.response?.data?.message || 'Something went wrong.');
+      Alert.alert('Booking Failed', error?.response?.data?.message || 'Could not process booking.');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleQuickDateSelect = (daysAhead: number) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysAhead);
+    d.setHours(10, 0, 0, 0);
+    setSelectedDate(d.toISOString());
   };
 
   if (loading) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#2563EB" />
-        <Text style={styles.loadingText}>Loading available doctors...</Text>
+        <Text style={styles.loadingText}>Loading available specialists...</Text>
       </View>
     );
   }
@@ -87,15 +100,16 @@ const BookAppointmentScreen = ({ navigation }: any) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <Text style={styles.headerTitle}>Book an Appointment</Text>
-      <Text style={styles.subTitle}>Select a specialist and preferred time</Text>
+      <Text style={styles.subTitle}>Select a specialist doctor and preferred consultation slot</Text>
 
       {/* Doctor Selection */}
-      <Text style={styles.sectionTitle}>1. Choose a Specialist</Text>
+      <Text style={styles.sectionTitle}>1. Select Hospital Specialist ({doctors.length} Available)</Text>
       {doctors.map((doc) => {
         const isSelected = selectedDoctor?.id === doc.id;
         return (
           <TouchableOpacity
             key={doc.id}
+            activeOpacity={0.7}
             style={[styles.doctorCard, isSelected && styles.doctorCardSelected]}
             onPress={() => setSelectedDoctor(doc)}>
             <View style={styles.radioContainer}>
@@ -108,16 +122,28 @@ const BookAppointmentScreen = ({ navigation }: any) => {
               <Text style={styles.doctorSpecialty}>
                 {doc.specialization} • {doc.department}
               </Text>
-              <Text style={styles.doctorFee}>Consultation Fee: ${doc.consultationFee}</Text>
+              <Text style={styles.doctorFee}>Consultation Fee: ${doc.consultationFee?.toFixed(2) || '150.00'}</Text>
             </View>
           </TouchableOpacity>
         );
       })}
 
       {/* Date & Time Selection */}
-      <Text style={styles.sectionTitle}>2. Scheduled Date & Time</Text>
+      <Text style={styles.sectionTitle}>2. Scheduled Date & Slot</Text>
+      <View style={styles.quickDateRow}>
+        <TouchableOpacity style={styles.dateChip} onPress={() => handleQuickDateSelect(1)}>
+          <Text style={styles.dateChipText}>Tomorrow</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.dateChip} onPress={() => handleQuickDateSelect(2)}>
+          <Text style={styles.dateChipText}>In 2 Days</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.dateChip} onPress={() => handleQuickDateSelect(3)}>
+          <Text style={styles.dateChipText}>In 3 Days</Text>
+        </TouchableOpacity>
+      </View>
+
       <View style={styles.inputContainer}>
-        <Text style={styles.inputLabel}>ISO Date/Time (e.g., 2026-10-01T10:30:00Z)</Text>
+        <Text style={styles.inputLabel}>ISO Date & Time Timestamp</Text>
         <TextInput
           style={styles.textInput}
           value={selectedDate}
@@ -141,6 +167,7 @@ const BookAppointmentScreen = ({ navigation }: any) => {
       <TouchableOpacity
         style={[styles.submitBtn, submitting && styles.btnDisabled]}
         onPress={handleBook}
+        activeOpacity={0.7}
         disabled={submitting}>
         {submitting ? (
           <ActivityIndicator color="#FFFFFF" />
@@ -159,6 +186,9 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    maxWidth: 700,
+    alignSelf: 'center',
+    width: '100%',
   },
   center: {
     flex: 1,
@@ -195,6 +225,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
+    elevation: 1,
   },
   doctorCardSelected: {
     borderColor: '#2563EB',
@@ -232,6 +263,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#2563EB',
     marginTop: 4,
+  },
+  quickDateRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 10,
+  },
+  dateChip: {
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  dateChipText: {
+    color: '#1D4ED8',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   inputContainer: {
     marginBottom: 12,
